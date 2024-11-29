@@ -17,14 +17,13 @@ public class MainPanel extends JPanel {
 //    private JPanel actionPanel;
 
     public MainPanel() {
+        // Set up the layout for the main panel
         setLayout(new BorderLayout());
         mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout());
-        saveFile = new SaveFile();
+        mainPanel.setLayout(new BorderLayout()); // No need to call this again
 
-        setLayout(new BorderLayout());
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout());
+        // Singleton SaveFile instance
+        saveFile = SaveFile.getInstance(); // Use the singleton instance
 
         // Set Title
         JLabel titleLabel = new JLabel("Welcome to Recipe Genie", SwingConstants.CENTER);
@@ -47,110 +46,65 @@ public class MainPanel extends JPanel {
 
         add(mainPanel, BorderLayout.CENTER);
 
+        // Action listeners for buttons
         searchButton.addActionListener(e -> showSearchPanel());
         filterButton.addActionListener(e -> showPreferencesPanel());
         savedButton.addActionListener(e -> showSavedRecipesPanel());
         additionalButton.addActionListener(e -> showAdditionalOnePanel());
-
     }
 
-    // Search Recipes Part by Zhiyu
     private void showSearchPanel() {
         mainPanel.removeAll();
 
+        // Back button
         JButton backButton = createBackButton();
         mainPanel.add(backButton, BorderLayout.NORTH);
 
+        // Search panel
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
 
-        JLabel searchLabel = new JLabel("Enter Food Name:");
+        JLabel searchLabel = new JLabel("Enter Recipe Name:");
         JTextField searchField = new JTextField(1);
         JButton searchSubmitButton = new JButton("Search");
+        JButton saveButton = new JButton("Save Recipe");
 
+        // Action for the Search button
         searchSubmitButton.addActionListener(e -> {
             String query = searchField.getText();
             try {
-                String result = fetchRecipeData(query);
+                String jsonResponse = NutritionAPI.fetchNutritionData(query);
+                String formattedResponse = NutritionAPI.formatNutritionData(jsonResponse);
+                JOptionPane.showMessageDialog(this, "Results:\n" + formattedResponse, "Search Results", JOptionPane.INFORMATION_MESSAGE);
 
-                // Show results with a save button
-                JPanel resultsPanel = new JPanel();
-                resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
+                // Enable the save button once a search is successful
+                saveButton.setEnabled(true);
 
-                String[] recipes = result.split("--------------------------------------");
-                for (String recipe : recipes) {
-                    if (!recipe.trim().isEmpty()) {
-                        JPanel recipePanel = new JPanel(new BorderLayout());
-                        JTextArea recipeText = new JTextArea(recipe);
-                        recipeText.setEditable(false);
-
-                        JButton saveButton = new JButton("Save");
-                        saveButton.addActionListener(event -> {
-                            saveFile.addRecipeUrl(recipe); // Save recipe to SaveFile
-                            JOptionPane.showMessageDialog(this, "Recipe saved!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                        });
-
-                        recipePanel.add(new JScrollPane(recipeText), BorderLayout.CENTER);
-                        recipePanel.add(saveButton, BorderLayout.EAST);
-                        resultsPanel.add(recipePanel);
-                    }
-                }
-
-                JScrollPane scrollPane = new JScrollPane(resultsPanel);
-                JOptionPane.showMessageDialog(this, scrollPane, "Search Results", JOptionPane.PLAIN_MESSAGE);
+                // Action for the Save button
+                saveButton.addActionListener(saveEvent -> {
+                    SaveFile saveFile = SaveFile.getInstance(); // Use the singleton instance
+                    saveFile.addRecipe(query, formattedResponse); // Save both the query (recipe name) and formatted nutritional info
+                    JOptionPane.showMessageDialog(this, "Recipe saved successfully!", "Saved", JOptionPane.INFORMATION_MESSAGE);
+                });
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error fetching recipes: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
+        saveButton.setEnabled(false); // Initially disable the save button
         searchPanel.add(searchLabel);
         searchPanel.add(searchField);
         searchPanel.add(searchSubmitButton);
+        searchPanel.add(saveButton);
 
         mainPanel.add(searchPanel, BorderLayout.CENTER);
+
         mainPanel.revalidate();
         mainPanel.repaint();
     }
 
 
-    private String fetchRecipeData(String query) throws Exception {
-        String apiUrl = "https://api.api-ninjas.com/v1/nutrition?query=" + query.replace(" ", "%20");
-        String apiKey = "RTsk4zAYtxwguq9NUOkpAQ==CIDpDJQmd3F2AJWc";
-
-        URL url = new URL(apiUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("X-Api-Key", apiKey);
-
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
-            reader.close();
-
-            // Parse JSON and format the response
-            JSONArray jsonResponse = new JSONArray(response.toString());
-            StringBuilder formattedResponse = new StringBuilder();
-            for (int i = 0; i < jsonResponse.length(); i++) {
-                JSONObject item = jsonResponse.getJSONObject(i);
-                formattedResponse.append("Name: ").append(item.getString("name")).append("\n");
-                formattedResponse.append("Sodium: ").append(item.getDouble("sodium_mg")).append("g\n");
-                formattedResponse.append("Sugar: ").append(item.getDouble("sugar_g")).append("\n");
-                formattedResponse.append("Cholesterol: ").append(item.getDouble("cholesterol_mg")).append("g\n");
-                formattedResponse.append("Potassium: ").append(item.getDouble("potassium_mg")).append("g\n");
-                formattedResponse.append("Fiber: ").append(item.getDouble("fiber_g")).append("g\n");
-                formattedResponse.append("--------------------------------------\n");
-            }
-            return formattedResponse.toString();
-        } else {
-            throw new Exception("API Error: " + responseCode);
-        }
-    }
 
     // Show Preferences Panel
     private void showPreferencesPanel() {
@@ -198,37 +152,38 @@ public class MainPanel extends JPanel {
         JPanel savedPanel = new JPanel();
         savedPanel.setLayout(new BoxLayout(savedPanel, BoxLayout.Y_AXIS));
 
-        JLabel label = new JLabel("Saved Recipes:");
-        savedPanel.add(label);
-
-        List<String> savedRecipes = saveFile.getRecipeUrl();
-        if (saveFile.isEmpty()) {
+        SaveFile saveFile = SaveFile.getInstance(); // Use the singleton instance
+        List<String[]> savedRecipes = saveFile.getSavedRecipes(); // Now this will return both name and nutritional info
+        if (savedRecipes.isEmpty()) {
             savedPanel.add(new JLabel("No saved recipes."));
         } else {
-            for (String recipe : savedRecipes) {
+            for (String[] recipeData : savedRecipes) {
+                String recipeName = recipeData[0];
+                String nutritionalInfo = recipeData[1];
+
                 JPanel recipePanel = new JPanel(new BorderLayout());
-                JTextArea recipeText = new JTextArea(recipe);
+                JTextArea recipeText = new JTextArea("Recipe: " + recipeName + "\n" + nutritionalInfo);
                 recipeText.setEditable(false);
 
-                JButton removeButton = new JButton("Remove");
-                removeButton.addActionListener(e -> {
-                    saveFile.removeRecipeUrl(recipe); // Remove recipe from SaveFile
-                    JOptionPane.showMessageDialog(this, "Recipe removed!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                // Add delete button for each recipe
+                JButton deleteButton = new JButton("Delete");
+                deleteButton.addActionListener(e -> {
+                    saveFile.removeRecipe(recipeName); // Remove the recipe based on its name
                     showSavedRecipesPanel(); // Refresh the panel
                 });
 
-                recipePanel.add(new JScrollPane(recipeText), BorderLayout.CENTER);
-                recipePanel.add(removeButton, BorderLayout.EAST);
+                recipePanel.add(recipeText, BorderLayout.CENTER);
+                recipePanel.add(deleteButton, BorderLayout.EAST);
                 savedPanel.add(recipePanel);
             }
         }
 
-        JScrollPane scrollPane = new JScrollPane(savedPanel);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(savedPanel, BorderLayout.CENTER);
 
         mainPanel.revalidate();
         mainPanel.repaint();
     }
+
 
     private void showAdditionalOnePanel() {
         mainPanel.removeAll();
