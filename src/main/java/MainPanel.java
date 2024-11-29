@@ -57,7 +57,7 @@ public class MainPanel extends JPanel {
         accountSettings.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showAdditionalOnePanel();
+                showAccountSettings();
             }
         });
     }
@@ -163,7 +163,7 @@ public class MainPanel extends JPanel {
 
     }
 
-    private void showAdditionalOnePanel() {
+    private void showAccountSettings() {
         mainPanel.removeAll();
 
         // back button
@@ -214,12 +214,12 @@ public class MainPanel extends JPanel {
         JButton searchButton = new JButton("Search Recipes");
         JButton filterButton = new JButton("Set Preferences");
         JButton savedButton = new JButton("View Saved Recipes");
-        JButton additionalButton = new JButton("Additional One");
+        JButton accountSettings = new JButton("Account Settings");
 
         buttonPanel.add(searchButton);
         buttonPanel.add(filterButton);
         buttonPanel.add(savedButton);
-        buttonPanel.add(additionalButton);
+        buttonPanel.add(accountSettings);
 
         contentPanel.add(buttonPanel, BorderLayout.CENTER);
         ///////////////////////////////////////////////////////////////////////////////////
@@ -243,10 +243,10 @@ public class MainPanel extends JPanel {
                 showSavedRecipesPanel();
             }
         });
-        additionalButton.addActionListener(new ActionListener() {
+        accountSettings.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showAdditionalOnePanel();
+                showAccountSettings();
             }
         });
 
