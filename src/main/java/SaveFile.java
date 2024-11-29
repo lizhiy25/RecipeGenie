@@ -1,53 +1,50 @@
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class SaveFile {
-    // Save file class for people that want to add their recipe to a saved file and access them later
+    private static SaveFile instance;
+    private List<String[]> savedRecipes; // Changed to store both name and nutritional info
 
-    private List<String> recipeUrls;
+    private SaveFile() {
+        savedRecipes = new ArrayList<>();
+    }
 
-    public SaveFile() {
-        recipeUrls = new ArrayList<>();
+    public static SaveFile getInstance() {
+        if (instance == null) {
+            instance = new SaveFile();
+        }
+        return instance;
     }
 
     public boolean isEmpty() {
-        return recipeUrls.isEmpty();
-    }
-    // This is to list all the recipes you have
-    public List<String> getRecipeUrl() {
-        return recipeUrls;
+        return savedRecipes.isEmpty();
     }
 
-    // Add what recipes you want to the list
-    public void addRecipeUrl(String url) {
-        if (!recipeUrls.contains(url)) {
-            recipeUrls.add(url);
-        }
+    // Get the list of saved recipes (name and nutritional info)
+    public List<String[]> getSavedRecipes() {
+        return savedRecipes;
     }
 
-    // Remove unwanted recipes from your list
-    public void removeRecipeUrl(String url) {
-        recipeUrls.remove(url);
+    // Add recipe name and nutritional info to the list
+    public void addRecipe(String name, String nutritionalInfo) {
+        savedRecipes.add(new String[] { name, nutritionalInfo });
     }
 
+    // Remove recipe by name
+    public void removeRecipe(String name) {
+        savedRecipes.removeIf(recipe -> recipe[0].equals(name));
+    }
+
+    // Fetch and add a recipe's nutritional data
     public void fetchAndAddRecipe(String query) {
         try {
-            // Call the static method from the NutritionAPI class
-            String response = NutritionAPI.fetchNutritionData(query);
-
-            // Simulate generating a recipe URL from the query
-            String recipeUrl = "https://example.com/recipe?query=" + query.replace(" ", "+");
-
-            // Add the URL to the list
-            addRecipeUrl(recipeUrl);
-
-            // Print the fetched data
-            System.out.println("Fetched data: " + response);
+            String jsonResponse = NutritionAPI.fetchNutritionData(query);
+            String formattedResponse = NutritionAPI.formatNutritionData(jsonResponse);
+            addRecipe(query, formattedResponse); // Save the recipe name and its nutritional data
         } catch (Exception e) {
             System.out.println("Failed to fetch data for query: " + query);
             e.printStackTrace();
         }
     }
 }
-
-
