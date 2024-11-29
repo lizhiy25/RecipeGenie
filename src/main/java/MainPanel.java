@@ -173,7 +173,7 @@ public class MainPanel extends JPanel {
         JPanel preferencesPanel = new JPanel();
         preferencesPanel.setLayout(new BoxLayout(preferencesPanel, BoxLayout.Y_AXIS));
 
-        //TODO:
+        //TODO: Change Password, Log out.
 
 
 
