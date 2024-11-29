@@ -1,4 +1,4 @@
-package main;
+package main.java;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,12 +25,12 @@ public class MainPanel extends JPanel {
         JButton searchButton = new JButton("Search Recipes");
         JButton filterButton = new JButton("Set Preferences");
         JButton savedButton = new JButton("View Saved Recipes");
-        JButton additionalButton = new JButton("Additional One");
+        JButton accountSettings = new JButton("Account Settings");
 
         buttonPanel.add(searchButton);
         buttonPanel.add(filterButton);
         buttonPanel.add(savedButton);
-        buttonPanel.add(additionalButton);
+        buttonPanel.add(accountSettings);
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
 
         add(mainPanel, BorderLayout.CENTER);
@@ -54,7 +54,7 @@ public class MainPanel extends JPanel {
                 showSavedRecipesPanel();
             }
         });
-        additionalButton.addActionListener(new ActionListener() {
+        accountSettings.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showAdditionalOnePanel();
