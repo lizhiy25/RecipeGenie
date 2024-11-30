@@ -1,18 +1,29 @@
-package main.java;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
 
 public class MainPanel extends JPanel {
     private JPanel mainPanel;
+    private SaveFile saveFile;
 //    private JPanel actionPanel;
 
     public MainPanel() {
+        // Set up the layout for the main panel
         setLayout(new BorderLayout());
         mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout());
+        mainPanel.setLayout(new BorderLayout()); // No need to call this again
+
+        // Singleton SaveFile instance
+        saveFile = SaveFile.getInstance(); // Use the singleton instance
 
         // Set Title
         JLabel titleLabel = new JLabel("Welcome to Recipe Genie", SwingConstants.CENTER);
@@ -25,89 +36,83 @@ public class MainPanel extends JPanel {
         JButton searchButton = new JButton("Search Recipes");
         JButton filterButton = new JButton("Set Preferences");
         JButton savedButton = new JButton("View Saved Recipes");
-        JButton accountSettings = new JButton("Account Settings");
+        JButton additionalButton = new JButton("Additional One");
 
         buttonPanel.add(searchButton);
         buttonPanel.add(filterButton);
         buttonPanel.add(savedButton);
-        buttonPanel.add(accountSettings);
+        buttonPanel.add(additionalButton);
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
 
         add(mainPanel, BorderLayout.CENTER);
 
-
-        searchButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showSearchPanel();
-            }
-        });
-        filterButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showPreferencesPanel();
-            }
-        });
-        savedButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showSavedRecipesPanel();
-            }
-        });
-        accountSettings.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showAccountSettings();
-            }
-        });
+        // Action listeners for buttons
+        searchButton.addActionListener(e -> showSearchPanel());
+        filterButton.addActionListener(e -> showPreferencesPanel());
+        savedButton.addActionListener(e -> showSavedRecipesPanel());
+        additionalButton.addActionListener(e -> showAdditionalOnePanel());
     }
 
-    // Search Recipes Part by Zhiyu
     private void showSearchPanel() {
         mainPanel.removeAll();
 
-        // back button
+        // Back button
         JButton backButton = createBackButton();
         mainPanel.add(backButton, BorderLayout.NORTH);
 
-        // Search(The main algorithm can be in a new java file)
+        // Search panel
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.Y_AXIS));
 
         JLabel searchLabel = new JLabel("Enter Recipe Name:");
         JTextField searchField = new JTextField(1);
-        // TODO: Layout need to be changed
         JButton searchSubmitButton = new JButton("Search");
+        JButton saveButton = new JButton("Save Recipe");
 
+        // Action for the Search button
         searchSubmitButton.addActionListener(e -> {
             String query = searchField.getText();
-            JOptionPane.showMessageDialog(this, "Searching for: " + query);
+            try {
+                String jsonResponse = NutritionAPI.fetchNutritionData(query);
+                String formattedResponse = NutritionAPI.formatNutritionData(jsonResponse);
+                JOptionPane.showMessageDialog(this, "Results:\n" + formattedResponse, "Search Results", JOptionPane.INFORMATION_MESSAGE);
+
+                // Enable the save button once a search is successful
+                saveButton.setEnabled(true);
+
+                // Action for the Save button
+                saveButton.addActionListener(saveEvent -> {
+                    SaveFile saveFile = SaveFile.getInstance(); // Use the singleton instance
+                    saveFile.addRecipe(query, formattedResponse); // Save both the query (recipe name) and formatted nutritional info
+                    JOptionPane.showMessageDialog(this, "Recipe saved successfully!", "Saved", JOptionPane.INFORMATION_MESSAGE);
+                });
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error fetching recipes: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
+        saveButton.setEnabled(false); // Initially disable the save button
         searchPanel.add(searchLabel);
         searchPanel.add(searchField);
         searchPanel.add(searchSubmitButton);
+        searchPanel.add(saveButton);
 
         mainPanel.add(searchPanel, BorderLayout.CENTER);
 
-        // Repaint
         mainPanel.revalidate();
         mainPanel.repaint();
     }
+
 
 
     // Show Preferences Panel
     private void showPreferencesPanel() {
         mainPanel.removeAll();
 
-        // back button
         JButton backButton = createBackButton();
         mainPanel.add(backButton, BorderLayout.NORTH);
 
-        //TODO: Preferences Settings(Just a Sample here)
-        //A bug here.
-        // When I select my preferences and return to the main page and go back to the preferences again,
-        // the option I selected disappears
         JPanel preferencesPanel = new JPanel();
         preferencesPanel.setLayout(new BoxLayout(preferencesPanel, BoxLayout.Y_AXIS));
 
@@ -131,60 +136,71 @@ public class MainPanel extends JPanel {
         preferencesPanel.add(lowSodiumCheckBox);
         preferencesPanel.add(applyButton);
 
-
-
         mainPanel.add(preferencesPanel, BorderLayout.CENTER);
 
         mainPanel.revalidate();
         mainPanel.repaint();
+
     }
 
     private void showSavedRecipesPanel() {
         mainPanel.removeAll();
 
-        // back button
         JButton backButton = createBackButton();
         mainPanel.add(backButton, BorderLayout.NORTH);
 
-        JPanel preferencesPanel = new JPanel();
-        preferencesPanel.setLayout(new BoxLayout(preferencesPanel, BoxLayout.Y_AXIS));
+        JPanel savedPanel = new JPanel();
+        savedPanel.setLayout(new BoxLayout(savedPanel, BoxLayout.Y_AXIS));
 
-        //TODO:
+        SaveFile saveFile = SaveFile.getInstance(); // Use the singleton instance
+        List<String[]> savedRecipes = saveFile.getSavedRecipes(); // Now this will return both name and nutritional info
+        if (savedRecipes.isEmpty()) {
+            savedPanel.add(new JLabel("No saved recipes."));
+        } else {
+            for (String[] recipeData : savedRecipes) {
+                String recipeName = recipeData[0];
+                String nutritionalInfo = recipeData[1];
 
+                JPanel recipePanel = new JPanel(new BorderLayout());
+                JTextArea recipeText = new JTextArea("Recipe: " + recipeName + "\n" + nutritionalInfo);
+                recipeText.setEditable(false);
 
+                // Add delete button for each recipe
+                JButton deleteButton = new JButton("Delete");
+                deleteButton.addActionListener(e -> {
+                    saveFile.removeRecipe(recipeName); // Remove the recipe based on its name
+                    showSavedRecipesPanel(); // Refresh the panel
+                });
 
+                recipePanel.add(recipeText, BorderLayout.CENTER);
+                recipePanel.add(deleteButton, BorderLayout.EAST);
+                savedPanel.add(recipePanel);
+            }
+        }
 
-
-
-        mainPanel.add(preferencesPanel, BorderLayout.CENTER);
+        mainPanel.add(savedPanel, BorderLayout.CENTER);
 
         mainPanel.revalidate();
         mainPanel.repaint();
-
     }
 
-    private void showAccountSettings() {
+
+    private void showAdditionalOnePanel() {
         mainPanel.removeAll();
 
-        // back button
         JButton backButton = createBackButton();
         mainPanel.add(backButton, BorderLayout.NORTH);
 
-        JPanel preferencesPanel = new JPanel();
-        preferencesPanel.setLayout(new BoxLayout(preferencesPanel, BoxLayout.Y_AXIS));
+        JPanel additionalPanel = new JPanel();
+        additionalPanel.setLayout(new BoxLayout(additionalPanel, BoxLayout.Y_AXIS));
 
-        //TODO: Change Password, Log out.
+        JLabel label = new JLabel("Additional Feature: (Coming soon)");
+        additionalPanel.add(label);
 
-
-
-
-
-
-        mainPanel.add(preferencesPanel, BorderLayout.CENTER);
+        mainPanel.add(additionalPanel, BorderLayout.CENTER);
 
         mainPanel.revalidate();
         mainPanel.repaint();
-
     }
 
     // Create Back Button
@@ -209,52 +225,25 @@ public class MainPanel extends JPanel {
         contentPanel.add(titleLabel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(2, 2, 10, 10)); // 两行两列布局
+        buttonPanel.setLayout(new GridLayout(2, 2, 10, 10));
 
         JButton searchButton = new JButton("Search Recipes");
         JButton filterButton = new JButton("Set Preferences");
         JButton savedButton = new JButton("View Saved Recipes");
-        JButton accountSettings = new JButton("Account Settings");
+        JButton additionalButton = new JButton("Additional One");
 
         buttonPanel.add(searchButton);
         buttonPanel.add(filterButton);
         buttonPanel.add(savedButton);
-        buttonPanel.add(accountSettings);
+        buttonPanel.add(additionalButton);
 
         contentPanel.add(buttonPanel, BorderLayout.CENTER);
-        ///////////////////////////////////////////////////////////////////////////////////
-        // I have to duplicate the above code here
-        // Without the following code, the return key will not work after one click
-        searchButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showSearchPanel();
-            }
-        });
-        filterButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showPreferencesPanel();
-            }
-        });
-        savedButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showSavedRecipesPanel();
-            }
-        });
-        accountSettings.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showAccountSettings();
-            }
-        });
+
+        searchButton.addActionListener(e -> showSearchPanel());
+        filterButton.addActionListener(e -> showPreferencesPanel());
+        savedButton.addActionListener(e -> showSavedRecipesPanel());
+        additionalButton.addActionListener(e -> showAdditionalOnePanel());
 
         return contentPanel;
-    }
-    ///////////////////////////////////////////////////////////////////////////
-
-    private void showMessage(String message) {
-        JOptionPane.showMessageDialog(this, message, "Action", JOptionPane.INFORMATION_MESSAGE);
     }
 }
