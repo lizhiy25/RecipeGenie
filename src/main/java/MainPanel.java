@@ -1,20 +1,13 @@
-import org.json.JSONArray;
-import org.json.JSONObject;
+package main.java;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 
 public class MainPanel extends JPanel {
-    private JPanel mainPanel;
+    private final JPanel mainPanel;
     private SaveFile saveFile;
-//    private JPanel actionPanel;
+    //    private JPanel actionPanel;
 
     public MainPanel() {
         // Set up the layout for the main panel
@@ -36,7 +29,7 @@ public class MainPanel extends JPanel {
         JButton searchButton = new JButton("Search Recipes");
         JButton filterButton = new JButton("Set Preferences");
         JButton savedButton = new JButton("View Saved Recipes");
-        JButton additionalButton = new JButton("Additional One");
+        JButton additionalButton = new JButton("Weight Loss Calculator");
 
         buttonPanel.add(searchButton);
         buttonPanel.add(filterButton);
@@ -73,7 +66,7 @@ public class MainPanel extends JPanel {
         searchSubmitButton.addActionListener(e -> {
             String query = searchField.getText();
             try {
-                String jsonResponse = NutritionAPI.fetchNutritionData(query);
+                String jsonResponse =   NutritionAPI.fetchNutritionData(query);
                 String formattedResponse = NutritionAPI.formatNutritionData(jsonResponse);
                 JOptionPane.showMessageDialog(this, "Results:\n" + formattedResponse, "Search Results", JOptionPane.INFORMATION_MESSAGE);
 
@@ -191,19 +184,133 @@ public class MainPanel extends JPanel {
         JButton backButton = createBackButton();
         mainPanel.add(backButton, BorderLayout.NORTH);
 
-        JPanel additionalPanel = new JPanel();
-        additionalPanel.setLayout(new BoxLayout(additionalPanel, BoxLayout.Y_AXIS));
+        JPanel weightLossPanel = new JPanel();
+        weightLossPanel.setLayout(new BoxLayout(weightLossPanel, BoxLayout.Y_AXIS));
 
-        JLabel label = new JLabel("Additional Feature: (Coming soon)");
-        additionalPanel.add(label);
+        JLabel titleLabel = new JLabel("Enter Your Details for Weight Loss Calculation:");
+        weightLossPanel.add(titleLabel);
 
-        mainPanel.add(additionalPanel, BorderLayout.CENTER);
+        // Inputs for weight loss calculation
+        JTextField weightField = new JTextField(10);
+        JTextField heightField = new JTextField(10);
+        JTextField ageField = new JTextField(10);
+        String[] genders = {"Male", "Female"};
+        JComboBox<String> genderComboBox = new JComboBox<>(genders);
+
+        JLabel weightLabel = new JLabel("Weight (kg):");
+        JLabel heightLabel = new JLabel("Height (cm):");
+        JLabel ageLabel = new JLabel("Age (years):");
+        JLabel genderLabel = new JLabel("Gender:");
+
+        JButton calculateButton = new JButton("Calculate Daily Calorie Requirement");
+
+        // Label to show the daily calorie requirement
+        JLabel calorieRequirementLabel = new JLabel("Your daily calorie requirement will appear here.");
+
+        calculateButton.addActionListener(e -> {
+            try {
+
+                double weight = Double.parseDouble(weightField.getText());
+                double height = Double.parseDouble(heightField.getText());
+                int age = Integer.parseInt(ageField.getText());
+                String gender = (String) genderComboBox.getSelectedItem();
+
+                // Calculate BMR using the Mifflin-St Jeor equation
+                double bmr;
+                if (gender.equals("Male")) {
+                    bmr = 10 * weight + 6.25 * height - 5 * age + 5; // Male BMR formula
+                } else {
+                    bmr = 10 * weight + 6.25 * height - 5 * age - 161; // Female BMR formula
+                }
+
+                // Assume sedentary activity level for simplicity (could add more activity options)
+                double tdee = bmr * 1.2; // Sedentary activity multiplier
+
+                // To lose 1lb per week, subtract 500 calories/day
+                double calorieDeficit = tdee - 500;
+
+                calorieRequirementLabel.setText("To lose 1 lb/week, you need " + calorieDeficit + " kcal/day.");
+
+                // Now transition to the calorie tracking panel, passing the required calories
+                showCalorieTrackingPanel(calorieDeficit);
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Please enter valid numbers for all fields.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        weightLossPanel.add(weightLabel);
+        weightLossPanel.add(weightField);
+        weightLossPanel.add(heightLabel);
+        weightLossPanel.add(heightField);
+        weightLossPanel.add(ageLabel);
+        weightLossPanel.add(ageField);
+        weightLossPanel.add(genderLabel);
+        weightLossPanel.add(genderComboBox);
+        weightLossPanel.add(calculateButton);
+        weightLossPanel.add(calorieRequirementLabel);
+
+        mainPanel.add(weightLossPanel, BorderLayout.CENTER);
 
         mainPanel.revalidate();
         mainPanel.repaint();
     }
 
+    private void showCalorieTrackingPanel(double dailyCalorieRequirement) {
+        mainPanel.removeAll();
+
+        JButton backButton = createBackButton();
+        mainPanel.add(backButton, BorderLayout.NORTH);
+
+        JPanel trackingPanel = new JPanel();
+        trackingPanel.setLayout(new BoxLayout(trackingPanel, BoxLayout.Y_AXIS));
+
+        JLabel calorieInputLabel = new JLabel("Enter Calories Consumed for Today:");
+        JTextField calorieInputField = new JTextField(10);
+
+        JButton submitCaloriesButton = new JButton("Submit Calories");
+
+        JLabel totalCaloriesLabel = new JLabel("Total Calories Consumed: 0");
+
+        JLabel dailyCalorieRequirementLabel = new JLabel("Your daily calorie requirement: " + dailyCalorieRequirement + " kcal");
+
+        final int[] totalCaloriesConsumed = {0};
+
+        submitCaloriesButton.addActionListener(e -> {
+            try {
+                int calories = Integer.parseInt(calorieInputField.getText());
+                totalCaloriesConsumed[0] += calories; // Add to the total
+
+                totalCaloriesLabel.setText("Total Calories Consumed: " + totalCaloriesConsumed[0]);
+
+                if (totalCaloriesConsumed[0] > dailyCalorieRequirement) {
+                    JOptionPane.showMessageDialog(this, "You have exceeded your calorie limit for weight loss!", "Warning", JOptionPane.WARNING_MESSAGE);
+                } else if (totalCaloriesConsumed[0] < dailyCalorieRequirement) {
+                    JOptionPane.showMessageDialog(this, "You're under your calorie limit. Stay on track for weight loss.", "Keep Going!", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "You are exactly on track with your calorie goal!", "Great Job!", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid number of calories.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        trackingPanel.add(dailyCalorieRequirementLabel);
+        trackingPanel.add(calorieInputLabel);
+        trackingPanel.add(calorieInputField);
+        trackingPanel.add(submitCaloriesButton);
+        trackingPanel.add(totalCaloriesLabel);
+
+        mainPanel.add(trackingPanel, BorderLayout.CENTER);
+
+        mainPanel.revalidate();
+        mainPanel.repaint();
+    }
+
+
     // Create Back Button
+
     private JButton createBackButton() {
         JButton backButton = new JButton("Back");
         backButton.addActionListener(e -> {
