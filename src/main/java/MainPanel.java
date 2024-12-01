@@ -133,16 +133,20 @@ public class MainPanel extends JPanel {
         });
         accountSettingsPanel.add(changePasswordButton);
 
-        JButton logoutButton = new JButton("Logout");
-        logoutButton.addActionListener(e -> {
-            SwingUtilities.invokeLater(() -> {
-                JFrame currentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-                currentFrame.dispose(); // Close current main application frame
-                Main.main(new String[0]); // Restart the application by calling Main
-            });
+        JButton exitButton = new JButton("Exit");
+        exitButton.addActionListener(e -> {
+            int response = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to exit?",
+                    "Exit",
+                    JOptionPane.YES_NO_OPTION
+            );
+            if (response == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            }
         });
 
-        accountSettingsPanel.add(logoutButton);
+        accountSettingsPanel.add(exitButton);
 
 
 
