@@ -33,6 +33,7 @@ public class LoginFrame extends JFrame {
     }
 
     public void setOnLoginSuccess(Runnable onLoginSuccess) {
+
         this.onLoginSuccess = onLoginSuccess;
     }
 }
