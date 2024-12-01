@@ -1,6 +1,8 @@
 //package main.java;
 
 import main.data.UserDatabase;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -63,18 +65,20 @@ public class MainPanel extends JPanel {
         JTextField searchField = new JTextField(1);
         JButton searchSubmitButton = new JButton("Search");
         JButton saveButton = new JButton("Save Recipe");
+        JButton cookButton = new JButton("Cook Recipe");
 
         // Action for the Search button
         searchSubmitButton.addActionListener(e -> {
             String query = searchField.getText();
             try {
-                String jsonResponse =   NutritionAPI.fetchNutritionData(query);
+                String jsonResponse = NutritionAPI.fetchNutritionData(query);
                 String formattedResponse = NutritionAPI.formatNutritionData(jsonResponse);
                 JOptionPane.showMessageDialog(this, "Results:\n" + formattedResponse,
                         "Search Results", JOptionPane.INFORMATION_MESSAGE);
 
                 // Enable the save button once a search is successful
                 saveButton.setEnabled(true);
+                cookButton.setEnabled(true);
 
                 // Action for the Save button
                 saveButton.addActionListener(saveEvent -> {
@@ -84,19 +88,73 @@ public class MainPanel extends JPanel {
                             "Saved", JOptionPane.INFORMATION_MESSAGE);
                 });
 
+
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Error fetching recipes: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
+        cookButton.addActionListener(cookEvent -> {
+            String query = searchField.getText();
+            showCookPanel(query);
+        });
+
         saveButton.setEnabled(false); // Initially disable the save button
+        cookButton.setEnabled(false);
         searchPanel.add(searchLabel);
         searchPanel.add(searchField);
         searchPanel.add(searchSubmitButton);
         searchPanel.add(saveButton);
+        searchPanel.add(cookButton);
 
         mainPanel.add(searchPanel, BorderLayout.CENTER);
+
+        mainPanel.revalidate();
+        mainPanel.repaint();
+    }
+
+    private void showCookPanel(String query) {
+        mainPanel.removeAll();
+
+        JButton backButton = createBackButton();
+        mainPanel.add(backButton, BorderLayout.NORTH);
+
+        JPanel cookPanel = new JPanel();
+        cookPanel.setLayout(new BoxLayout(cookPanel, BoxLayout.Y_AXIS));
+
+        try {
+            String recipeResponse = RecipeAPI.fetchRecipeData(query);
+            JSONArray recipes = new JSONArray(recipeResponse);
+            if (recipes.length() > 0) {
+                JSONObject recipe = recipes.getJSONObject(0);
+                String title = recipe.getString("title");
+                String ingredients = recipe.getString("ingredients");
+                String servings = recipe.getString("servings");
+                String instructions = recipe.getString("instructions");
+
+                JLabel titleLabel = new JLabel("Title: " + title);
+                JLabel ingredientsLabel = new JLabel("Ingredients: " + ingredients);
+                JLabel servingsLabel = new JLabel("Servings: " + servings);
+                JTextArea instructionsArea = new JTextArea("Instructions: " + instructions);
+                instructionsArea.setEditable(false);
+                instructionsArea.setLineWrap(true);
+                instructionsArea.setWrapStyleWord(true);
+
+                cookPanel.add(titleLabel);
+                cookPanel.add(ingredientsLabel);
+                cookPanel.add(servingsLabel);
+                cookPanel.add(new JScrollPane(instructionsArea));
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Recipe not found!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error fetching recipes: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+        mainPanel.add(cookPanel, BorderLayout.CENTER);
 
         mainPanel.revalidate();
         mainPanel.repaint();
