@@ -28,10 +28,10 @@ Group Members:
 **Account Settings**: You can view your account profile here. You can also change your username and password here.
 
 
-//Licenses needed
-//Section for feedback Needed
+## 2.Feedback and Issues: 
+If you encounter any issues or have suggestions while using Recipe Genie, please click the "Issue" button in the top-right corner of the GitHub page, then select "New Issue." After that, please provide a title and a detailed description of the problem or suggestion. We greatly appreciate your feedback!
+
 //Section for contributions Needed
-//
 
 
 
