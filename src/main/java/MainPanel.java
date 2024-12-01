@@ -1,4 +1,4 @@
-package main.java;
+//package main.java;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,23 +27,23 @@ public class MainPanel extends JPanel {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(2, 2, 10, 10));
         JButton searchButton = new JButton("Search Recipes");
-        JButton filterButton = new JButton("Set Preferences");
+        JButton accountSettingsButton = new JButton("Account Settings");
         JButton savedButton = new JButton("View Saved Recipes");
-        JButton additionalButton = new JButton("Weight Loss Calculator");
+        JButton weightLossCalculatorButton = new JButton("Weight Loss Calculator");
 
         buttonPanel.add(searchButton);
-        buttonPanel.add(filterButton);
+        buttonPanel.add(accountSettingsButton);
         buttonPanel.add(savedButton);
-        buttonPanel.add(additionalButton);
+        buttonPanel.add(weightLossCalculatorButton);
         mainPanel.add(buttonPanel, BorderLayout.CENTER);
 
         add(mainPanel, BorderLayout.CENTER);
 
         // Action listeners for buttons
         searchButton.addActionListener(e -> showSearchPanel());
-        filterButton.addActionListener(e -> showPreferencesPanel());
+        accountSettingsButton.addActionListener(e -> showAccountSettingsPanel());
         savedButton.addActionListener(e -> showSavedRecipesPanel());
-        additionalButton.addActionListener(e -> showAdditionalOnePanel());
+        weightLossCalculatorButton.addActionListener(e -> showWeightLossCalculatorPanel());
     }
 
     private void showSearchPanel() {
@@ -99,37 +99,38 @@ public class MainPanel extends JPanel {
 
 
 
-    // Show Preferences Panel
-    private void showPreferencesPanel() {
+    // Account Settings
+    private void showAccountSettingsPanel() {
         mainPanel.removeAll();
 
         JButton backButton = createBackButton();
         mainPanel.add(backButton, BorderLayout.NORTH);
 
-        JPanel preferencesPanel = new JPanel();
-        preferencesPanel.setLayout(new BoxLayout(preferencesPanel, BoxLayout.Y_AXIS));
+        JPanel accountSettingsPanel = new JPanel();
+        accountSettingsPanel.setLayout(new BoxLayout(accountSettingsPanel, BoxLayout.Y_AXIS));
 
-        JLabel preferencesLabel = new JLabel("Set Your Preferences:");
-        JCheckBox vegetarianCheckBox = new JCheckBox("Vegetarian");
-        JCheckBox glutenFreeCheckBox = new JCheckBox("Gluten Free");
-        JCheckBox lowSodiumCheckBox = new JCheckBox("Low Sodium");
 
-        JButton applyButton = new JButton("Apply Preferences");
-        applyButton.addActionListener(e -> {
-            String preferences = "Preferences: ";
-            if (vegetarianCheckBox.isSelected()) preferences += "Vegetarian, ";
-            if (glutenFreeCheckBox.isSelected()) preferences += "Gluten Free, ";
-            if (lowSodiumCheckBox.isSelected()) preferences += "Low Sodium, ";
-            JOptionPane.showMessageDialog(this, preferences + "applied!");
-        });
+//        JLabel preferencesLabel = new JLabel("Set Your Preferences:");
+//        JCheckBox vegetarianCheckBox = new JCheckBox("Vegetarian");
+//        JCheckBox glutenFreeCheckBox = new JCheckBox("Gluten Free");
+//        JCheckBox lowSodiumCheckBox = new JCheckBox("Low Sodium");
+//
+//        JButton applyButton = new JButton("Apply Preferences");
+//        applyButton.addActionListener(e -> {
+//            String preferences = "Preferences: ";
+//            if (vegetarianCheckBox.isSelected()) preferences += "Vegetarian, ";
+//            if (glutenFreeCheckBox.isSelected()) preferences += "Gluten Free, ";
+//            if (lowSodiumCheckBox.isSelected()) preferences += "Low Sodium, ";
+//            JOptionPane.showMessageDialog(this, preferences + "applied!");
+//        });
+//
+//        accountSettingsPanel.add(preferencesLabel);
+//        accountSettingsPanel.add(vegetarianCheckBox);
+//        accountSettingsPanel.add(glutenFreeCheckBox);
+//        accountSettingsPanel.add(lowSodiumCheckBox);
+//        accountSettingsPanel.add(applyButton);
 
-        preferencesPanel.add(preferencesLabel);
-        preferencesPanel.add(vegetarianCheckBox);
-        preferencesPanel.add(glutenFreeCheckBox);
-        preferencesPanel.add(lowSodiumCheckBox);
-        preferencesPanel.add(applyButton);
-
-        mainPanel.add(preferencesPanel, BorderLayout.CENTER);
+        mainPanel.add(accountSettingsPanel, BorderLayout.CENTER);
 
         mainPanel.revalidate();
         mainPanel.repaint();
@@ -178,7 +179,7 @@ public class MainPanel extends JPanel {
     }
 
 
-    private void showAdditionalOnePanel() {
+    private void showWeightLossCalculatorPanel() {
         mainPanel.removeAll();
 
         JButton backButton = createBackButton();
@@ -335,21 +336,21 @@ public class MainPanel extends JPanel {
         buttonPanel.setLayout(new GridLayout(2, 2, 10, 10));
 
         JButton searchButton = new JButton("Search Recipes");
-        JButton filterButton = new JButton("Set Preferences");
+        JButton accountSettingsButton = new JButton("Account Settings");
         JButton savedButton = new JButton("View Saved Recipes");
-        JButton additionalButton = new JButton("Additional One");
+        JButton weightLossCalculatorButton = new JButton("Weight Loss Calculator");
 
         buttonPanel.add(searchButton);
-        buttonPanel.add(filterButton);
+        buttonPanel.add(accountSettingsButton);
         buttonPanel.add(savedButton);
-        buttonPanel.add(additionalButton);
+        buttonPanel.add(weightLossCalculatorButton);
 
         contentPanel.add(buttonPanel, BorderLayout.CENTER);
 
         searchButton.addActionListener(e -> showSearchPanel());
-        filterButton.addActionListener(e -> showPreferencesPanel());
+        accountSettingsButton.addActionListener(e -> showAccountSettingsPanel());
         savedButton.addActionListener(e -> showSavedRecipesPanel());
-        additionalButton.addActionListener(e -> showAdditionalOnePanel());
+        weightLossCalculatorButton.addActionListener(e -> showWeightLossCalculatorPanel());
 
         return contentPanel;
     }

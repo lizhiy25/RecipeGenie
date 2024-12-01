@@ -1,3 +1,4 @@
+//package main.java;
 import javax.swing.*;
 import java.util.List;
 
@@ -9,6 +10,29 @@ public class Main {
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(800, 600);
             frame.setLocationRelativeTo(null); // Center the screen
+
+//            // Create Login Frame
+//            LoginFrame loginFrame = new LoginFrame();
+//
+//            loginFrame.setOnLoginSuccess(() -> {
+//                loginFrame.dispose();
+//                openMainApplication();
+//            });
+//
+//            loginFrame.setVisible(true);
+//        });
+//    }
+//
+//    private static void openMainApplication() {
+//        JFrame mainFrame = new JFrame("Recipe Genie");
+//        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        mainFrame.setSize(800, 600);
+//        mainFrame.setLocationRelativeTo(null);
+//        mainFrame.add(new MainPanel());
+//        mainFrame.setVisible(true);
+//    }
+//}
+////Delete below after
 
             // Main Panel
             frame.add(new MainPanel());
