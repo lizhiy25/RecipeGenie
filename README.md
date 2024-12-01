@@ -1,3 +1,11 @@
+## Recipe Genie
+Group 116 decides to develop a program that recommends recipes tailored to user preferences and call it Recipe Genie.
+
+Group Members: 
+* Brandon
+* Willis
+* Zhiyu
+
 ## 0. How to Download the Recipe Genie
 **The Internet connection is required to run this program, and it will not run successfully without the Internet.**
 * There are two ways to download the Recipe Genie. You can either click the **green icon** "code", then download the zip document, unzip the file, or copy the link and clone the repository, use JAVA with JDK(The development environment is JDK17) to open the program.
@@ -11,6 +19,19 @@
 
 <img src="https://i.postimg.cc/qqPN7Grx/search-Recipes.png" width="444" height="250">
 
-**View Saved Recipes**: 
+**View Saved Recipes**: In this function, you can view the nutrients of the recipes you saved, and remove it by clicking "Delete" button on the right side.
+
+<img src="https://i.postimg.cc/W3Fj4Fn2/saved-Recipes.png" width="800" height="600">
+
+**Weight Loss Calculator**: When you use this function, you have to enter your Weight(kg), Height(cm), Age, and Gender first. Then, when you click "Calculate Daily Calorie Requirement" button, you will see filter recipes by low calorie content and dietary preferences, to reate a sustainable, healthy meal plan
+
+**Account Settings**: You can view your account profile here. You can also change your username and password here.
+
+
+//Licenses needed
+//Section for feedback Needed
+//Section for contributions Needed
+//
+
 
 
