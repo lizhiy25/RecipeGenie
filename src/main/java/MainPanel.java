@@ -20,10 +20,10 @@ public class MainPanel extends JPanel {
         // Set up the layout for the main panel
         setLayout(new BorderLayout());
         mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout()); // No need to call this again
+        mainPanel.setLayout(new BorderLayout());
 
         // Singleton SaveFile instance
-        saveFile = SaveFile.getInstance(); // Use the singleton instance
+        saveFile = (SaveFile) SaveFile.getInstance(); // Cast to SaveFile
 
         // Set Title
         JLabel titleLabel = new JLabel("Welcome to Recipe Genie", SwingConstants.CENTER);
@@ -82,8 +82,8 @@ public class MainPanel extends JPanel {
 
                 // Action for the Save button
                 saveButton.addActionListener(saveEvent -> {
-                    SaveFile saveFile = SaveFile.getInstance(); // Use the singleton instance
-                    saveFile.addRecipe(query, formattedResponse); // Save both the query (recipe name) and formatted nutritional info
+                    Repository.RecipeRepository recipeRepository = SaveFile.getInstance(); // Use RecipeRepository
+                    recipeRepository.addRecipe(new Recipe(query, formattedResponse)); // Save both the query (recipe name) and formatted nutritional info
                     JOptionPane.showMessageDialog(this, "Recipe saved successfully!", "Saved", JOptionPane.INFORMATION_MESSAGE);
                 });
 
@@ -152,14 +152,15 @@ public class MainPanel extends JPanel {
         JPanel savedPanel = new JPanel();
         savedPanel.setLayout(new BoxLayout(savedPanel, BoxLayout.Y_AXIS));
 
-        SaveFile saveFile = SaveFile.getInstance(); // Use the singleton instance
-        List<String[]> savedRecipes = saveFile.getSavedRecipes(); // Now this will return both name and nutritional info
+        Repository.RecipeRepository recipeRepository = SaveFile.getInstance(); // Use the singleton instance
+        List<Recipe> savedRecipes = recipeRepository.getRecipes(); // Use getRecipes() to fetch saved recipes
+
         if (savedRecipes.isEmpty()) {
             savedPanel.add(new JLabel("No saved recipes."));
         } else {
-            for (String[] recipeData : savedRecipes) {
-                String recipeName = recipeData[0];
-                String nutritionalInfo = recipeData[1];
+            for (Recipe recipe : savedRecipes) {
+                String recipeName = recipe.getName();
+                String nutritionalInfo = recipe.getNutritionalInfo();
 
                 JPanel recipePanel = new JPanel(new BorderLayout());
                 JTextArea recipeText = new JTextArea("Recipe: " + recipeName + "\n" + nutritionalInfo);
@@ -168,7 +169,7 @@ public class MainPanel extends JPanel {
                 // Add delete button for each recipe
                 JButton deleteButton = new JButton("Delete");
                 deleteButton.addActionListener(e -> {
-                    saveFile.removeRecipe(recipeName); // Remove the recipe based on its name
+                    recipeRepository.removeRecipe(recipeName); // Remove the recipe based on its name
                     showSavedRecipesPanel(); // Refresh the panel
                 });
 
