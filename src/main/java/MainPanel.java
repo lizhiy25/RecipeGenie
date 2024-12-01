@@ -68,7 +68,8 @@ public class MainPanel extends JPanel {
             try {
                 String jsonResponse =   NutritionAPI.fetchNutritionData(query);
                 String formattedResponse = NutritionAPI.formatNutritionData(jsonResponse);
-                JOptionPane.showMessageDialog(this, "Results:\n" + formattedResponse, "Search Results", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Results:\n" + formattedResponse,
+                        "Search Results", JOptionPane.INFORMATION_MESSAGE);
 
                 // Enable the save button once a search is successful
                 saveButton.setEnabled(true);
@@ -77,11 +78,13 @@ public class MainPanel extends JPanel {
                 saveButton.addActionListener(saveEvent -> {
                     SaveFile saveFile = SaveFile.getInstance(); // Use the singleton instance
                     saveFile.addRecipe(query, formattedResponse); // Save both the query (recipe name) and formatted nutritional info
-                    JOptionPane.showMessageDialog(this, "Recipe saved successfully!", "Saved", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Recipe saved successfully!",
+                            "Saved", JOptionPane.INFORMATION_MESSAGE);
                 });
 
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error fetching recipes: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Error fetching recipes: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -236,7 +239,9 @@ public class MainPanel extends JPanel {
                 showCalorieTrackingPanel(calorieDeficit);
 
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Please enter valid numbers for all fields.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Please enter valid numbers for all fields.",
+                        "Invalid Input", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -273,7 +278,8 @@ public class MainPanel extends JPanel {
 
         JLabel totalCaloriesLabel = new JLabel("Total Calories Consumed: 0");
 
-        JLabel dailyCalorieRequirementLabel = new JLabel("Your daily calorie requirement: " + dailyCalorieRequirement + " kcal");
+        JLabel dailyCalorieRequirementLabel = new JLabel("Your daily calorie requirement: " +
+                dailyCalorieRequirement + " kcal");
 
         final int[] totalCaloriesConsumed = {0};
 
@@ -285,15 +291,23 @@ public class MainPanel extends JPanel {
                 totalCaloriesLabel.setText("Total Calories Consumed: " + totalCaloriesConsumed[0]);
 
                 if (totalCaloriesConsumed[0] > dailyCalorieRequirement) {
-                    JOptionPane.showMessageDialog(this, "You have exceeded your calorie limit for weight loss!", "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this,
+                            "You have exceeded your calorie limit for weight loss!", "Warning",
+                            JOptionPane.WARNING_MESSAGE);
                 } else if (totalCaloriesConsumed[0] < dailyCalorieRequirement) {
-                    JOptionPane.showMessageDialog(this, "You're under your calorie limit. Stay on track for weight loss.", "Keep Going!", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(this,
+                            "You're under your calorie limit. Stay on track for weight loss.",
+                            "Keep Going!", JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(this, "You are exactly on track with your calorie goal!", "Great Job!", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(this,
+                            "You are exactly on track with your calorie goal!",
+                            "Great Job!", JOptionPane.INFORMATION_MESSAGE);
                 }
 
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Please enter a valid number of calories.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Please enter a valid number of calories.",
+                        "Invalid Input", JOptionPane.ERROR_MESSAGE);
             }
         });
 

@@ -42,11 +42,14 @@ public class RegisterPanel extends JPanel {
 
 
             if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Please fill in all fields.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
             } else if (!password.equals(confirmPassword)) {
-                JOptionPane.showMessageDialog(this, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Passwords do not match.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
             } else if (!UserDatabase.registerUser(username, password)) {
-                JOptionPane.showMessageDialog(this, "Username already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Username already exists.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "Registration successful!");
                 cardLayout.show(cardPanel, "Login");
