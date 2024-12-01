@@ -1,5 +1,7 @@
 //package main.java;
 
+import main.data.UserDatabase;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -112,26 +114,38 @@ public class MainPanel extends JPanel {
         JPanel accountSettingsPanel = new JPanel();
         accountSettingsPanel.setLayout(new BoxLayout(accountSettingsPanel, BoxLayout.Y_AXIS));
 
+        String currentUsername = UserDatabase.getCurrentUsername();
+        String currentPassword = UserDatabase.getPassword(currentUsername);
 
-//        JLabel preferencesLabel = new JLabel("Set Your Preferences:");
-//        JCheckBox vegetarianCheckBox = new JCheckBox("Vegetarian");
-//        JCheckBox glutenFreeCheckBox = new JCheckBox("Gluten Free");
-//        JCheckBox lowSodiumCheckBox = new JCheckBox("Low Sodium");
-//
-//        JButton applyButton = new JButton("Apply Preferences");
-//        applyButton.addActionListener(e -> {
-//            String preferences = "Preferences: ";
-//            if (vegetarianCheckBox.isSelected()) preferences += "Vegetarian, ";
-//            if (glutenFreeCheckBox.isSelected()) preferences += "Gluten Free, ";
-//            if (lowSodiumCheckBox.isSelected()) preferences += "Low Sodium, ";
-//            JOptionPane.showMessageDialog(this, preferences + "applied!");
-//        });
-//
-//        accountSettingsPanel.add(preferencesLabel);
-//        accountSettingsPanel.add(vegetarianCheckBox);
-//        accountSettingsPanel.add(glutenFreeCheckBox);
-//        accountSettingsPanel.add(lowSodiumCheckBox);
-//        accountSettingsPanel.add(applyButton);
+        JLabel usernameLabel = new JLabel("Username: " + currentUsername);
+        accountSettingsPanel.add(usernameLabel);
+
+        JLabel passwordLabel = new JLabel("Password: " + currentPassword);
+        accountSettingsPanel.add(passwordLabel);
+
+        JButton changePasswordButton = new JButton("Change Password");
+        changePasswordButton.addActionListener(e -> {
+            String newPassword = JOptionPane.showInputDialog(this, "Enter new password:");
+            if (newPassword != null && !newPassword.isEmpty()) {
+                UserDatabase.updatePassword(currentUsername, newPassword);
+                JOptionPane.showMessageDialog(this, "Password updated successfully!");
+            }
+        });
+        accountSettingsPanel.add(changePasswordButton);
+
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> {
+                JFrame currentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                currentFrame.dispose(); // Close current main application frame
+                Main.main(new String[0]); // Restart the application by calling Main
+            });
+        });
+
+        accountSettingsPanel.add(logoutButton);
+
+
+
 
         mainPanel.add(accountSettingsPanel, BorderLayout.CENTER);
 

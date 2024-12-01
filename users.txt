@@ -1,3 +1,1 @@
 admin:admin
-111:222
-yyyy:1111
