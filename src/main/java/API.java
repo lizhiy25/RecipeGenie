@@ -10,11 +10,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.management.Query;
+
 
 class NutritionAPI {
 
     public static String fetchNutritionData(String query) throws Exception {
-        String apiUrl = "https://api.api-ninjas.com/v1/nutrition?query=" + query;
+        String encodedQuery = URLEncoder.encode(query, "UTF-8");
+        String apiUrl = "https://api.api-ninjas.com/v1/nutrition?query=" + encodedQuery;
         String apiKey = "RTsk4zAYtxwguq9NUOkpAQ==CIDpDJQmd3F2AJWc";
 
         URL url = new URL(apiUrl);
