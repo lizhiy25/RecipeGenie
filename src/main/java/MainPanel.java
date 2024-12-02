@@ -64,94 +64,175 @@ public class MainPanel extends JPanel {
         JLabel searchLabel = new JLabel("Enter Recipe Name:");
         JTextField searchField = new JTextField(1);
         JButton searchSubmitButton = new JButton("Search");
-        JButton saveButton = new JButton("Save Recipe");
-        JButton cookButton = new JButton("Cook Recipe");
 
         // Action for the Search button
         searchSubmitButton.addActionListener(e -> {
             String query = searchField.getText();
             try {
-                String jsonResponse = NutritionAPI.fetchNutritionData(query);
-                String formattedResponse = NutritionAPI.formatNutritionData(jsonResponse);
-                JOptionPane.showMessageDialog(this, "Results:\n" + formattedResponse,
-                        "Search Results", JOptionPane.INFORMATION_MESSAGE);
+                String recipeResponse = RecipeAPI.fetchRecipeData(query);
+                JSONArray recipes = new JSONArray(recipeResponse);
 
-                // Enable the save button once a search is successful
-                saveButton.setEnabled(true);
-                cookButton.setEnabled(true);
+                if (recipes.length() > 0) {
+                    // Create and display the list of recipe titles
+                    String[] titles = new String[recipes.length()];
+                    for (int i = 0; i < titles.length; i++) {
+                        titles[i] = recipes.getJSONObject(i).getString("title");
+                    }
 
-                // Action for the Save button
-                saveButton.addActionListener(saveEvent -> {
-                    SaveFile saveFile = SaveFile.getInstance(); // Use the singleton instance
-                    saveFile.addRecipe(query, formattedResponse); // Save both the query (recipe name) and formatted nutritional info
-                    JOptionPane.showMessageDialog(this, "Recipe saved successfully!",
-                            "Saved", JOptionPane.INFORMATION_MESSAGE);
-                });
+                    JList<String> recipeList = new JList<>(titles);
+                    recipeList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
+                    // Detail Panel for recipe details
+                    JPanel detailPanel = new JPanel();
+                    detailPanel.setLayout(new BoxLayout(detailPanel, BoxLayout.Y_AXIS));
 
+                    // Buttons
+                    JButton showNutritionButton = new JButton("Show Nutrition");
+                    JButton saveRecipeButton = new JButton("Save Recipe");
+
+                    showNutritionButton.setEnabled(false);
+                    saveRecipeButton.setEnabled(false);
+
+                    // Update detail panel when a recipe is selected
+                    recipeList.addListSelectionListener(event -> {
+                        if (!event.getValueIsAdjusting()) {
+                            int selectedIndex = recipeList.getSelectedIndex();
+                            if (selectedIndex >= 0) {
+                                JSONObject selectedRecipe = recipes.getJSONObject(selectedIndex);
+
+                                String formattedRecipeDetails = displayFormattedRecipe(selectedRecipe);
+
+                                JTextArea recipeArea = new JTextArea(formattedRecipeDetails);
+                                recipeArea.setEditable(false);
+                                recipeArea.setLineWrap(true);
+                                recipeArea.setWrapStyleWord(true);
+
+                                // Clear the detail panel and add the new details
+                                detailPanel.removeAll();
+                                detailPanel.add(new JScrollPane(recipeArea));
+
+                                detailPanel.add(showNutritionButton);
+                                detailPanel.add(saveRecipeButton);
+
+                                // Enable buttons after selection
+                                showNutritionButton.setEnabled(true);
+                                saveRecipeButton.setEnabled(true);
+
+                                // Refresh the panel
+                                detailPanel.revalidate();
+                                detailPanel.repaint();
+
+                                // Action for Save Recipe
+                                saveRecipeButton.addActionListener(saveEvent -> {
+                                    // Use the selectedRecipe from the previous selection logic
+                                    if (selectedIndex >= 0) {
+                                        // Save only the selected recipe with the formatted details
+                                        SaveFile saveFile = SaveFile.getInstance(); // Singleton instance
+                                        saveFile.addRecipe(recipes.getJSONObject(selectedIndex).getString("title"),
+                                                formattedRecipeDetails);
+                                        // Inform the user that the recipe was saved
+                                        JOptionPane.showMessageDialog(this,
+                                                "Recipe saved successfully!",
+                                                "Saved", JOptionPane.INFORMATION_MESSAGE);
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                    // Action for Show Nutrition
+                    showNutritionButton.addActionListener(nutritionEvent -> {
+                        int selectedIndex = recipeList.getSelectedIndex();
+                        if (selectedIndex >= 0) {
+                            JSONObject selectedRecipe = recipes.getJSONObject(selectedIndex);
+                            String recipeTitle = selectedRecipe.getString("title");
+                            try {
+                                String nutritionData = NutritionAPI.fetchNutritionData(recipeTitle);
+                                String formattedNutrition = NutritionAPI.formatNutritionData(nutritionData);
+
+                                // Display nutrition data in the detail panel
+                                JTextArea nutritionArea = new JTextArea(formattedNutrition);
+                                nutritionArea.setEditable(false);
+                                nutritionArea.setLineWrap(true);
+                                nutritionArea.setWrapStyleWord(true);
+
+                                detailPanel.removeAll();
+                                detailPanel.add(new JLabel("Nutrition Information:"));
+                                detailPanel.add(new JScrollPane(nutritionArea));
+
+                                detailPanel.revalidate();
+                                detailPanel.repaint();
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(this,
+                                        "Error fetching nutrition data: " + ex.getMessage(),
+                                        "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    });
+
+                    // Layout: List on the left, details on the right
+                    JPanel searchResultPanel = new JPanel(new BorderLayout());
+                    searchResultPanel.add(new JScrollPane(recipeList), BorderLayout.WEST);
+                    searchResultPanel.add(new JScrollPane(detailPanel), BorderLayout.CENTER);
+
+                    // Add to main panel
+                    mainPanel.removeAll();
+                    mainPanel.add(searchResultPanel, BorderLayout.CENTER);
+                    mainPanel.add(backButton, BorderLayout.NORTH);
+
+                    mainPanel.revalidate();
+                    mainPanel.repaint();
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "No recipes found!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
                         "Error fetching recipes: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        cookButton.addActionListener(cookEvent -> {
-            String query = searchField.getText();
-            showCookPanel(query);
-        });
-
-        saveButton.setEnabled(false); // Initially disable the save button
-        cookButton.setEnabled(false);
         searchPanel.add(searchLabel);
         searchPanel.add(searchField);
         searchPanel.add(searchSubmitButton);
-        searchPanel.add(saveButton);
-        searchPanel.add(cookButton);
 
-        mainPanel.add(searchPanel, BorderLayout.CENTER);
+        mainPanel.add(searchPanel, BorderLayout.SOUTH);
 
         mainPanel.revalidate();
         mainPanel.repaint();
     }
 
-    private void showCookPanel(String query) {
-        mainPanel.removeAll();
+    private String displayFormattedRecipe(JSONObject selectedRecipe) {
+        // Retrieve recipe data
+        String title = selectedRecipe.getString("title");
+        String ingredients = selectedRecipe.getString("ingredients");
+        String instructions = selectedRecipe.getString("instructions");
+        String servings = selectedRecipe.getString("servings");
 
-        JButton backButton = createBackButton();
-        mainPanel.add(backButton, BorderLayout.NORTH);
+        // Format the recipe in a clean, readable format
+        StringBuilder formattedRecipe = new StringBuilder();
+        formattedRecipe.append("Title: ").append(title).append("\n\n");
 
-        JPanel cookPanel = new JPanel();
-        cookPanel.setLayout(new BoxLayout(cookPanel, BoxLayout.Y_AXIS));
-
-        try {
-            String recipeResponse = RecipeAPI.fetchRecipeData(query);
-            JSONArray recipes = new JSONArray(recipeResponse);
-
-            if (recipes.length() > 0) {
-                String formattedResponse =RecipeAPI.formatRecipeData(recipeResponse);
-                JTextArea recipeTextArea = new JTextArea(formattedResponse);
-                recipeTextArea.setEditable(false);
-                recipeTextArea.setLineWrap(true);
-                recipeTextArea.setWrapStyleWord(true);
-
-                cookPanel.add(new JScrollPane(recipeTextArea));
-
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Recipe not found!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Error fetching recipes: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        // Display Ingredients
+        formattedRecipe.append("Ingredients:\n");
+        String[] ingredientList = ingredients.split("\\|");
+        for (String ingredient : ingredientList) {
+            formattedRecipe.append("- ").append(ingredient.trim()).append("\n");
         }
 
-        mainPanel.add(cookPanel, BorderLayout.CENTER);
+        // Display Instructions
+        formattedRecipe.append("\nInstructions:\n");
+        String[] instructionsList = instructions.split("\\*");
+        for (int i = 0; i < instructionsList.length; i++) {
+            if (!instructionsList[i].trim().isEmpty()) {
+                formattedRecipe.append(i + 1).append(". ").append(instructionsList[i].trim()).append("\n");
+            }
+        }
 
-        mainPanel.revalidate();
-        mainPanel.repaint();
+        formattedRecipe.append("\nServings: ").append(servings).append("\n");
+
+        return formattedRecipe.toString();
     }
-
-
 
     // Account Settings
     private void showAccountSettingsPanel() {
