@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -80,17 +81,30 @@ class RecipeAPI{
     }
 
     public static String formatRecipeData(String jsonResponse) {
-        JSONArray jsonArray = new JSONArray(jsonResponse);
         StringBuilder formattedResponse = new StringBuilder();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject item = jsonArray.getJSONObject(i);
-            formattedResponse.append("title: ").append(item.getString("title")).append("\n")
-                    .append("ingredients: ").append(item.getString("ingredients")).append("\n")
-                    .append("servings: ").append(item.getString("servings")).append("\n")
-                    .append("instructions: ").append(item.getString("instructions")).append("\n")
-                    .append("--------------------------------------\n");
+        try {
+            if (jsonResponse.startsWith("[")) {
+                JSONArray jsonArray = new JSONArray(jsonResponse);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject item = jsonArray.getJSONObject(i);
+                    formattedResponse.append("title: ").append(item.getString("title")).append("\n")
+                            .append("ingredients: ").append(item.getString("ingredients")).append("\n")
+                            .append("servings: ").append(item.getString("servings")).append("\n")
+                            .append("instructions: ").append(item.getString("instructions")).append("\n")
+                            .append("--------------------------------------\n");
+                }
+            } else if (jsonResponse.startsWith("{")) {
+                JSONObject jsonObject = new JSONObject(jsonResponse);
+                formattedResponse.append("Error or single recipe received:\n")
+                        .append(jsonObject.toString(4)); // Pretty-print the JSON object
+            } else {
+                formattedResponse.append("Unexpected response format:\n").append(jsonResponse);
+            }
+        } catch (JSONException e) {
+            formattedResponse.append("Error parsing response: ").append(e.getMessage());
         }
         return formattedResponse.toString();
     }
+
 
 }
