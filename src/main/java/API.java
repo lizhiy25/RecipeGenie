@@ -1,43 +1,17 @@
-//package main.java;
-import java.io.IOException;
 import java.net.*;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.management.Query;
-
 
 class NutritionAPI {
+    private static String API_URL ="https://api.api-ninjas.com/v1/nutrition?query=";
+    private static final String API_KEY = "RTsk4zAYtxwguq9NUOkpAQ==CIDpDJQmd3F2AJWc";
 
     public static String fetchNutritionData(String query) throws Exception {
         String encodedQuery = URLEncoder.encode(query, "UTF-8");
-        String apiUrl = "https://api.api-ninjas.com/v1/nutrition?query=" + encodedQuery;
-        String apiKey = "RTsk4zAYtxwguq9NUOkpAQ==CIDpDJQmd3F2AJWc";
-
-        URL url = new URL(apiUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("X-Api-Key", apiKey);
-
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
-            reader.close();
-            return response.toString();
-        } else {
-            throw new Exception("Error: " + responseCode);
-        }
+        String apiUrl = API_URL + encodedQuery;
+        return ApiHelper.makeHttpRequest(apiUrl, API_KEY);
     }
 
     public static String formatNutritionData(String jsonResponse) {
@@ -58,29 +32,12 @@ class NutritionAPI {
 }
 
 class RecipeAPI{
+    private static final String API_URL = "https://api.api-ninjas.com/v1/recipe?query=";
+    private static final String API_KEY = "RTsk4zAYtxwguq9NUOkpAQ==CIDpDJQmd3F2AJWc";
 
     public static String fetchRecipeData(String query) throws Exception {
-        String apiUrl = "https://api.api-ninjas.com/v1/recipe?query=" + query;
-        String apiKey = "RTsk4zAYtxwguq9NUOkpAQ==CIDpDJQmd3F2AJWc";
-
-        URL url = new URL(apiUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("X-Api-Key", apiKey);
-
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
-            reader.close();
-            return response.toString();
-        } else {
-            throw new Exception("Error: " + responseCode);
-        }
+        String apiUrl = API_URL + URLEncoder.encode(query, "UTF-8");
+        return ApiHelper.makeHttpRequest(apiUrl, API_KEY);  // Using the helper method
     }
 
     public static String formatRecipeData(String jsonResponse) {
