@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.awt.event.ActionListener;
 
 public class MainPanel extends JPanel {
     private final JPanel mainPanel;
@@ -122,18 +123,30 @@ public class MainPanel extends JPanel {
                                 detailPanel.revalidate();
                                 detailPanel.repaint();
 
+                                for (ActionListener listener : saveRecipeButton.getActionListeners()) {
+                                    saveRecipeButton.removeActionListener(listener);
+                                }
+
                                 // Action for Save Recipe
                                 saveRecipeButton.addActionListener(saveEvent -> {
+                                    SaveFile saveFile = SaveFile.getInstance();
+                                    String recipeTitle = selectedRecipe.getString("title");
                                     // Use the selectedRecipe from the previous selection logic
-                                    if (selectedIndex >= 0) {
-                                        // Save only the selected recipe with the formatted details
-                                        SaveFile saveFile = SaveFile.getInstance(); // Singleton instance
-                                        saveFile.addRecipe(recipes.getJSONObject(selectedIndex).getString("title"),
-                                                formattedRecipeDetails);
+                                    if (saveFile.isRecipeSaved(recipeTitle)) {
+                                        JOptionPane.showMessageDialog(this,
+                                                "This recipe has already been saved.",
+                                                "Information", JOptionPane.INFORMATION_MESSAGE);
+                                    } else {
+                                        // Add recipe if not already saved
+                                        saveFile.addRecipe(recipeTitle, formattedRecipeDetails);
+
                                         // Inform the user that the recipe was saved
                                         JOptionPane.showMessageDialog(this,
                                                 "Recipe saved successfully!",
                                                 "Saved", JOptionPane.INFORMATION_MESSAGE);
+
+                                        // Disable the save button after saving
+                                        saveRecipeButton.setEnabled(false);
                                     }
                                 });
                             }
