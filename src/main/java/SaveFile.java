@@ -2,46 +2,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SaveFile {
+public class SaveFile implements Repository.RecipeRepository {
     private static SaveFile instance;
-    private List<String[]> savedRecipes; // Changed to store both name and nutritional info
+    private final List<Recipe> savedRecipes;
 
     private SaveFile() {
         savedRecipes = new ArrayList<>();
     }
 
-    public static SaveFile getInstance() {
+    public static Repository.RecipeRepository getInstance() {
         if (instance == null) {
             instance = new SaveFile();
         }
         return instance;
     }
 
+    @Override
     public boolean isEmpty() {
         return savedRecipes.isEmpty();
     }
 
-    // Get the list of saved recipes (name and nutritional info)
-    public List<String[]> getSavedRecipes() {
-        return savedRecipes;
+    @Override
+    public List<Recipe> getRecipes() {
+        return new ArrayList<>(savedRecipes);
     }
 
-    // Add recipe name and nutritional info to the list
-    public void addRecipe(String name, String nutritionalInfo) {
-        savedRecipes.add(new String[] { name, nutritionalInfo });
+    @Override
+    public void addRecipe(Recipe recipe) {
+        boolean exists = savedRecipes.stream()
+                .anyMatch(savedRecipe -> savedRecipe.getName().equals(recipe.getName()));
+
+        if (!exists) {
+            savedRecipes.add(recipe);
+        }
     }
 
-    // Remove recipe by name
+    @Override
     public void removeRecipe(String name) {
-        savedRecipes.removeIf(recipe -> recipe[0].equals(name));
+        savedRecipes.removeIf(recipe -> recipe.getName().equals(name));
     }
 
-    // Fetch and add a recipe's nutritional data
     public void fetchAndAddRecipe(String query) {
         try {
             String jsonResponse = NutritionAPI.fetchNutritionData(query);
             String formattedResponse = NutritionAPI.formatNutritionData(jsonResponse);
-            addRecipe(query, formattedResponse); // Save the recipe name and its nutritional data
+            addRecipe(new Recipe(query, formattedResponse));
         } catch (Exception e) {
             System.out.println("Failed to fetch data for query: " + query);
             e.printStackTrace();
