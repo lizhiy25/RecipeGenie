@@ -126,25 +126,16 @@ public class MainPanel extends JPanel {
         try {
             String recipeResponse = RecipeAPI.fetchRecipeData(query);
             JSONArray recipes = new JSONArray(recipeResponse);
+
             if (recipes.length() > 0) {
-                JSONObject recipe = recipes.getJSONObject(0);
-                String title = recipe.getString("title");
-                String ingredients = recipe.getString("ingredients");
-                String servings = recipe.getString("servings");
-                String instructions = recipe.getString("instructions");
+                String formattedResponse =RecipeAPI.formatRecipeData(recipeResponse);
+                JTextArea recipeTextArea = new JTextArea(formattedResponse);
+                recipeTextArea.setEditable(false);
+                recipeTextArea.setLineWrap(true);
+                recipeTextArea.setWrapStyleWord(true);
 
-                JLabel titleLabel = new JLabel("Title: " + title);
-                JLabel ingredientsLabel = new JLabel("Ingredients: " + ingredients);
-                JLabel servingsLabel = new JLabel("Servings: " + servings);
-                JTextArea instructionsArea = new JTextArea("Instructions: " + instructions);
-                instructionsArea.setEditable(false);
-                instructionsArea.setLineWrap(true);
-                instructionsArea.setWrapStyleWord(true);
+                cookPanel.add(new JScrollPane(recipeTextArea));
 
-                cookPanel.add(titleLabel);
-                cookPanel.add(ingredientsLabel);
-                cookPanel.add(servingsLabel);
-                cookPanel.add(new JScrollPane(instructionsArea));
             } else {
                 JOptionPane.showMessageDialog(this,
                         "Recipe not found!", "Error", JOptionPane.ERROR_MESSAGE);
