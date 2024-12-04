@@ -5,7 +5,7 @@ import java.util.List;
 
 public class SaveFile {
     private static SaveFile instance;
-    private List<String[]> savedRecipes; // Changed to store both name and nutritional info
+    private final List<String[]> savedRecipes; // Changed to store both name and nutritional info
 
     private SaveFile() {
         savedRecipes = new ArrayList<>();
@@ -25,6 +25,16 @@ public class SaveFile {
     // Get the list of saved recipes (name and nutritional info)
     public List<String[]> getSavedRecipes() {
         return savedRecipes;
+    }
+
+    // Check if a recipe has already been saved
+    public boolean isRecipeSaved(String name) {
+        for (String[] recipe : savedRecipes) {
+            if (recipe[0].equals(name)) {
+                return true; // Recipe is already saved
+            }
+        }
+        return false; // Recipe not found
     }
 
     // Add recipe name and nutritional info to the list
