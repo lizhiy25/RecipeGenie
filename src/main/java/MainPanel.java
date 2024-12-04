@@ -13,8 +13,6 @@ import java.util.List;
 
 public class MainPanel extends JPanel {
     private JPanel mainPanel;
-    private SaveFile saveFile;
-//    private JPanel actionPanel;
 
     public MainPanel() {
         // Set up the layout for the main panel
@@ -23,7 +21,7 @@ public class MainPanel extends JPanel {
         mainPanel.setLayout(new BorderLayout());
 
         // Singleton SaveFile instance
-        saveFile = (SaveFile) SaveFile.getInstance(); // Cast to SaveFile
+        SaveFile saveFile = (SaveFile) SaveFile.getInstance(); // Cast to SaveFile
 
         // Set Title
         JLabel titleLabel = new JLabel("Welcome to Recipe Genie", SwingConstants.CENTER);
