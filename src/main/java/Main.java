@@ -19,17 +19,13 @@ public class Main {
 
 class Saved {
     public static void main(String[] args) {
-        // Create an instance of SaveFile using RecipeRepository interface
-        Repository.RecipeRepository recipeRepository = SaveFile.getInstance(); // Get singleton instance of SaveFile
+        Repository.RecipeRepository recipeRepository = SaveFile.getInstance();
 
-        // Add a recipe using the Nutrition API (name and nutritional information)
         recipeRepository.fetchAndAddRecipe("1lb brisket and fries");
 
-        // Print all saved recipes
         System.out.println("Saved Recipes:");
-        List<Recipe> savedRecipes = recipeRepository.getRecipes(); // Get list of recipes
+        List<Recipe> savedRecipes = recipeRepository.getRecipes();
 
-        // Loop through and print recipe details
         for (Recipe recipe : savedRecipes) {
             System.out.println("Recipe: " + recipe.getName());
             System.out.println("Nutritional Info: " + recipe.getNutritionalInfo());
